@@ -59,14 +59,11 @@ dispatcher = DispatcherMiddleware(app.wsgi_app, {"/metrics": make_wsgi_app()})
 One can optionally define the buckets of observation for the `request_second` histogram by doing:
 
 ```python
-...
-Monitor.init(app, true, [0.1]); // where only one bucket (of 100ms) will be given as output in the /metrics endpoint
+register_metrics(app, buckets=[0.1]); // where only one bucket (of 100ms) will be given as output in the /metrics endpoint
 ```
 
 Other optional parameters are also:
-1. `version`: a semantic version string identifying the version of your application. Empty by default.
-2. `isErrorCallback`: an error callback to define what **you** consider as error. `4**` and `5**` considered as errors by default;
-3. `metricsEndpoint`: the endpoint where the metrics will be exposed. `/metrics` by default.
+2. `error_fn`: an error callback to define what **you** consider as error. `4**` and `5**` considered as errors by default;
 
 `Monitor` also comes with a `promclient` so you can expose your custom prometheus metrics:
 

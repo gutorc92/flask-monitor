@@ -8,11 +8,11 @@ from prometheus_client import Counter, Histogram, Info
 # Metrics registration
 #
 
-
 METRICS_REQUEST_LATENCY = Histogram(
     "request_seconds",
     "records in a histogram the number of http requests and their duration in seconds",
-    ["type", "status", "method", "addr", "version", "isError"]
+    ["type", "status", "method", "addr", "version", "isError"],
+    buckets=[0.1, 0.3, 1.5, 10.5]
 )
 
 METRICS_REQUEST_SIZE = Counter(
@@ -51,17 +51,16 @@ def after_request(response):
     size_request = int(response.headers.get("Content-Length", 0))
     request_latency = time.time() - request._prometheus_metrics_request_start_time
     error_status = is_error(response.status_code)
-    print("error_status", error_status)
-    METRICS_REQUEST_LATENCY.labels("http", response.status_code, request.method, request.path, app_version, error_status).observe(
-        request_latency
-    )
+    METRICS_REQUEST_LATENCY \
+        .labels("http", response.status_code, request.method, request.path, app_version, error_status) \
+        .observe(request_latency)
     METRICS_REQUEST_SIZE.labels(
         "http", response.status_code, request.method, request.path, app_version, error_status
     ).inc(size_request)
     return response
 
 
-def register_metrics(app, app_version=None, app_config=None, error_fn=None):
+def register_metrics(app, buckets=None, error_fn=None):
     """
     Register metrics middlewares
 
@@ -74,9 +73,18 @@ def register_metrics(app, app_version=None, app_config=None, error_fn=None):
     could be executed in arbitrary order.
     """
     if error_fn is not None:
-        print("passou")
         is_error.__code__ = error_fn.__code__
-        print("is_error", is_error("200"))
+    if buckets is not None:
+        print("Passou aqui", buckets)
+        globals()["METRICS_REQUEST_LATENCY"] = Histogram(
+            "request_seconds",
+            "records in a histogram the number of http requests and their duration in seconds",
+            ["type", "status", "method", "addr", "version", "isError"],
+            buckets=buckets
+        )
+        print("buckets ", globals()["METRICS_REQUEST_LATENCY"]._buckets)
+        # globals()["METRICS_REQUEST_LATENCY"]._prepare_buckets(buckets)
+        # globals()["METRICS_REQUEST_LATENCY"]._metric_init()
     app.before_request(before_request)
     app.after_request(after_request)
     # METRICS_INFO.info({"version": app_version, "config": app_config})

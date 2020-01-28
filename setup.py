@@ -1,13 +1,15 @@
+print("Testando")
 from setuptools import setup, find_packages
 from version import get_version
+print("Version", get_version())
 from pathlib import Path
 
 current_dir = Path(__file__).resolve().parent
 description = 'A Prometheus middleware for your Python Flask app.'
-
+print("dire", current_dir)
 try:
     history = current_dir.joinpath('CHANGELOG.md').read_text()
-    long_description = '\n\n'.join([current_dir.joinpath('README.md').read_text(), history])
+    long_description = '\n\n'.join([current_dir.joinpath('../README.md').read_text(), history])
 except FileNotFoundError:
     long_description = 'A Prometheus middleware to add basic but very useful metrics for your Python Flask app.'
 

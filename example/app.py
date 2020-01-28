@@ -1,9 +1,10 @@
-from flask import Flask
+
 from prometheus_client import make_wsgi_app
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.serving import run_simple
+import traceback
 from flask_monitor import register_metrics
-
+from flask import Flask
 app = Flask(__name__)
 app.config["APP_VERSION"] = "v0.1.2"
 
