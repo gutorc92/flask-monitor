@@ -6,8 +6,9 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+flask-monitor = {editable = true,path = "./.."}
 flask = "*"
-3a9685e = {editable = true,path = "./../flask_monitor"}
+prometheus-client = "*"
 
 [requires]
 python_version = "3.8"
