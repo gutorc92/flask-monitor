@@ -8,6 +8,10 @@ def test_metric_app_request_latency_seconds(app, client):
     with app.test_request_context():
         response = client.get("/metrics")
         assert b"request_seconds" in response.data
+        assert b"le=\"0.1\"" in response.data
+        assert b"le=\"0.3\"" in response.data
+        assert b"le=\"1.5\"" in response.data
+        assert b"le=\"10.5\"" in response.data
 
 
 def test_metric_app_request_count(app, client):

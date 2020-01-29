@@ -9,6 +9,7 @@ verify_ssl = true
 flask-monitor = {editable = true,path = "./.."}
 flask = "*"
 prometheus-client = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"

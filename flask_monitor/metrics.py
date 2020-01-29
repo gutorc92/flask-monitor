@@ -1,12 +1,25 @@
 import time
-
+import threading
+import traceback
+import logging
 from flask import request, current_app
-
-from prometheus_client import Counter, Histogram, Info
+from prometheus_client import Counter, Histogram, Info, Gauge
 
 #
 # Request callbacks
 #
+
+METRICS_INFO = Gauge(
+    "application_info", 
+    "records static application info such as it's semantic version number",
+    ["version"]
+)
+
+DEPENDENCY_UP = Gauge(
+    'dependency_up',
+    'records if a dependency is up or down. 1 for up, 0 for down',
+    ["name"]
+)
 
 def is_error(code):
     code = str(code) if type(code) is int else code
@@ -39,12 +52,7 @@ def register_metrics(app, buckets=[0.1, 0.3, 1.5, 10.5], error_fn=None):
         "counts the size of each http response",
         ["type", "status", "method", "addr", "version", "isError"],
     )
-
-    METRICS_INFO = Info(
-        "dependency_up", 
-        "records if a dependency is up or down. 1 for up, 0 for down"
-    )
-
+    
     def before_request():
         """
         Get start time of a request
@@ -71,3 +79,16 @@ def register_metrics(app, buckets=[0.1, 0.3, 1.5, 10.5], error_fn=None):
         is_error.__code__ = error_fn.__code__
     app.before_request(before_request)
     app.after_request(after_request)
+
+def watch_dependencies(dependency, func, time_execution=1500):
+    
+    def thread_function():
+        x = threading.Timer(time_execution, lambda x: x + 1)
+        x.start()
+        x.join()
+        response = func()
+        DEPENDENCY_UP.labels(dependency).set(response)
+        thread_function()
+    x = threading.Timer(10, thread_function)
+    x.start()
+
