@@ -35,6 +35,10 @@ Add this package as a dependency:
 pip install flask-monitor
 ```
 
+```
+pipenv install flask-monitor
+```
+
 ## HTTP Metrics
 
 Use it as middleware:
