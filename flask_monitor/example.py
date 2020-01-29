@@ -17,34 +17,18 @@ from flask_monitor import register_metrics
 # Constants
 #
 
-CONFIG = {"version": "v0.1.2", "config": "staging"}
-MAIN = Blueprint("main", __name__)
 
-
-#
-# Main app
-#
-
-
-@MAIN.route("/")
-def index():
-    return "Test"
-
-
-def register_blueprints(app):
-    """
-    Register blueprints to the app
-    """
-    app.register_blueprint(MAIN)
-
-
-def create_app(config):
+def create_app():
     """
     Application factory
     """
     app = Flask(__name__)
+    app.config["VERSION"] = "v1.2.0"
 
-    register_blueprints(app)
+    @app.route('/teste')
+    def hello_teste():
+        return 'Test'
+
     register_metrics(app)
     return app
 
@@ -54,12 +38,11 @@ def create_app(config):
 #
 
 
-def create_dispatcher() -> DispatcherMiddleware:
+def create_dispatcher(app) -> DispatcherMiddleware:
     """
     App factory for dispatcher middleware managing multiple WSGI apps
     """
-    main_app = create_app(config=CONFIG)
-    return DispatcherMiddleware(main_app.wsgi_app, {"/metrics": make_wsgi_app()})
+    return DispatcherMiddleware(app.wsgi_app, {"/metrics": make_wsgi_app()})
 
 
 #

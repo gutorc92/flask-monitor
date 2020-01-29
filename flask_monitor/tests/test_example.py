@@ -1,6 +1,6 @@
 def test_endpoint_index(app, client):
     with app.test_request_context():
-        response = client.get("/")
+        response = client.get("/teste")
         assert b"Test" in response.data
 
 

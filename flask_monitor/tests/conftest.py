@@ -1,6 +1,6 @@
 import pytest
 
-from flask_monitor.example import CONFIG, create_app, create_dispatcher
+from flask_monitor.example import create_app, create_dispatcher
 
 
 def pytest_make_parametrize_id(config, val, argname):
@@ -18,9 +18,9 @@ def app(request):
     """
     Return Flask Application with testing settings
     """
-    app = create_app(CONFIG)
+    app = create_app()
     # See https://stackoverflow.com/a/36222848/4241180
-    app.wsgi_app = create_dispatcher()
+    app.wsgi_app = create_dispatcher(app)
     app_context = app.app_context()
     app_context.push()
     app.testing = True
