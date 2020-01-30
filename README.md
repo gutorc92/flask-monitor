@@ -69,41 +69,30 @@ register_metrics(app, buckets=[0.1]); // where only one bucket (of 100ms) will b
 Other optional parameters are also:
 2. `error_fn`: an error callback to define what **you** consider as error. `4**` and `5**` considered as errors by default;
 
-`Monitor` also comes with a `promclient` so you can expose your custom prometheus metrics:
-
-```js
-// below we define a Gauge metric
-var myGauge = new Monitor.promclient.Gauge({
-    name: "my_gauge",
-    help: "records my custom gauge metric",
-    labelNames: [ "example_label" ]
-});
-
-...
-
-// and here we add a metric event that will be automatically exposed to /metrics endpoint
-myGauge.set({"example_label":"value"}, 220);
-```
-
-**Important**: This middleware requires to be put first in the middleware execution chain, so it can capture metrics from all possible requests.
 
 ## Dependency Metrics
 
-For you to know when a dependency is up or down, just provide a health check callback to be `watchDependencies` function:
+For you to know when a dependency is up or down, just provide a health check callback to be `watch_dependencies` function:
 
-```js
-const express = require("express");
-const { Monitor } = require("@labbsr0x/express-monitor");
+```python
+app = Flask(__name__)
+app.config["APP_VERSION"] = "v0.1.2"
 
-const app = express();
-Monitor.init(app, true);
+register_metrics(app)
+# Plug metrics WSGI app to your main app with dispatcher
+dispatcher = DispatcherMiddleware(app.wsgi_app, {"/metrics": make_wsgi_app()})
 
-// A RegisterDepedencyMetricsCallback will be automatically injected into the HealthCheckCallback
-Monitor.watchDependencies((register) => {
-    // here you implement the logic to go after your dependencies and check their health
-    register({ name: "Fake dependency 1", up: true});
-    register({ name: "Fake dependency 2", up: false});
-});
+def check_db():
+    try:
+        response = req.get("http://localhost:7000/bd")
+        if response.status_code == 200:
+            return 1
+    except:
+        traceback.print_stack()
+    return 0
+
+watch_dependencies("Bd", check_db)
+
 ```
 
 Now run your app and point prometheus to the defined metrics endpoint of your server.
